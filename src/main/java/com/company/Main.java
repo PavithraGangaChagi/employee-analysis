@@ -23,43 +23,36 @@ public class Main {
 
         try {
             List<Employee> employees = employeeFileReader.readEmployees("employees.csv");
-
-            Map<Integer, Employee> employeeById =
-                    employeeHierarchyService.buildEmployeeByIdMap(employees);
-
-            Map<Integer, List<Employee>> subordinatesByManagerId =
-                    employeeHierarchyService.buildSubordinatesByManagerIdMap(employees);
-
-            List<SalaryViolation> salaryViolations =
-                    salaryAnalyzer.analyze(subordinatesByManagerId, employeeById);
+            Map<Integer, Employee> employeeById = employeeHierarchyService.buildEmployeeByIdMap(employees);
+            Map<Integer, List<Employee>> subordinatesByManagerId = employeeHierarchyService.buildSubordinatesByManagerIdMap(employees);
+            List<SalaryViolation> salaryViolations = salaryAnalyzer.analyze(subordinatesByManagerId, employeeById);
 
             System.out.println("Managers with salary violations:");
-            for (SalaryViolation violation : salaryViolations) {
-                String messageType = violation.getViolationType() == ViolationType.TOO_LOW
-                        ? "earns less than required by "
-                        : "earns more than allowed by ";
-
-                System.out.println(
-                        violation.getManager().getFullName() + " " +
-                                messageType +
-                                String.format("%.2f", violation.getAmount())
-                );
+            if (salaryViolations.isEmpty()) {
+                System.out.println("No managers have salary violations.");
+            } else {
+                for (SalaryViolation violation : salaryViolations) {
+                    String messageType = violation.violationType() == ViolationType.TOO_LOW
+                            ? "earns less than required by " : "earns more than allowed by ";
+                    System.out.println(
+                            violation.manager().getFullName() + " " + messageType + String.format("%.2f", violation.amount())
+                    );
+                }
             }
 
-            List<ReportingLineViolation> reportingLineViolations =
-                    reportingLineAnalyzer.analyze(employees, employeeById);
-
+            List<ReportingLineViolation> reportingLineViolations = reportingLineAnalyzer.analyze(employees, employeeById);
             System.out.println();
             System.out.println("Employees with reporting line too long:");
-            for (ReportingLineViolation violation : reportingLineViolations) {
-                System.out.println(
-                        violation.getEmployee().getFullName() +
-                                " has reporting line too long by " +
-                                violation.getExcessManagers() +
-                                " level(s)"
-                );
+            if (reportingLineViolations.isEmpty()) {
+                System.out.println("No employees have a reporting line that is too long.");
+            } else {
+                for (ReportingLineViolation violation : reportingLineViolations) {
+                    System.out.println(
+                            violation.employee().getFullName() +
+                                    " has reporting line too long by " + violation.excessManagers() + " level(s)"
+                    );
+                }
             }
-
         } catch (IOException exception) {
             System.out.println("Error reading file: " + exception.getMessage());
         }

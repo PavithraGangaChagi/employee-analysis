@@ -15,7 +15,7 @@ public class EmployeeHierarchyService {
     public Map<Integer, Employee> buildEmployeeByIdMap(List<Employee> employees) {
         Map<Integer, Employee> employeeById = new HashMap<>();
         for (Employee employee : employees) {
-            employeeById.put(employee.getId(), employee);
+            employeeById.put(employee.id(), employee);
         }
         return employeeById;
     }
@@ -29,7 +29,7 @@ public class EmployeeHierarchyService {
     public Map<Integer, List<Employee>> buildSubordinatesByManagerIdMap(List<Employee> employees) {
         Map<Integer, List<Employee>> subordinatesByManagerId = new HashMap<>();
         for (Employee employee : employees) {
-            Integer managerId = employee.getManagerId();
+            Integer managerId = employee.managerId();
             if (Objects.nonNull(managerId)) {
                 subordinatesByManagerId.computeIfAbsent(managerId, key -> new ArrayList<>()).add(employee);
             }
