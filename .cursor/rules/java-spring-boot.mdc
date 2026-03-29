@@ -1,0 +1,97 @@
+---
+description: Java, Spring Boot 3.x, Spring Framework, Maven, Lombok, JUnit, and related conventions
+globs: "**/*.{java,xml,properties,yml,yaml}"
+alwaysApply: false
+---
+
+# Spring Boot stack
+
+- Write clean, documented Java with accurate **Spring Boot** patterns. Layer apps consistently: **controllers**, **services**, **repositories**, **models (entities/DTOs)**, **configuration**.
+- **Naming**: PascalCase classes (`UserController`, `OrderService`); camelCase methods/variables (`findUserById`, `isOrderValid`); `ALL_CAPS` constants (`MAX_RETRY_ATTEMPTS`, `DEFAULT_PAGE_SIZE`).
+- Prefer **Java 17+** features when they help (records, sealed classes, pattern matching).
+- Use **Lombok** to cut boilerplate; pair it with Spring patterns below (constructor injection via `@RequiredArgsConstructor`, logging via `@Slf4j`, etc.).
+- Design **REST** APIs with correct HTTP methods and status codes; keep controllers thin and delegate to services.
+
+## Spring Boot core
+
+- Use **Spring Boot starters** and the **dependency BOM** for consistent versions; rely on **auto-configuration** where it fits, and override explicitly when behavior must be guaranteed.
+- Use annotations idiomatically: `@SpringBootApplication`, `@RestController`, `@Service`, `@Repository`, `@Configuration`, `@Bean` as appropriate.
+- Centralize HTTP/API errors with **`@ControllerAdvice`** + **`@ExceptionHandler`**; return consistent problem bodies and status codes.
+
+## Configuration
+
+- Use **`application.properties`** or **`application.yml`**; split environments with **Spring Profiles** (`dev`, `test`, `prod`).
+- Prefer **`@ConfigurationProperties`** for typed, validated config (constructor binding when possible).
+
+## Dependency injection
+
+- Prefer **constructor injection** over field injection for testability and clear dependencies.
+- With **Lombok**, use **`@RequiredArgsConstructor`** on classes whose dependencies are `final` fields—Spring injects via the generated constructor; do not mix `@Autowired` on fields.
+
+```java
+// Prefer (Lombok + constructor injection)
+@Service
+@RequiredArgsConstructor
+public class OrderService {
+  private final OrderRepository orders;
+}
+
+// Acceptable without Lombok
+@Service
+public class OrderService {
+  private final OrderRepository orders;
+  public OrderService(OrderRepository orders) { this.orders = orders; }
+}
+
+// Avoid for production services
+@Service
+public class BadOrderService {
+  @Autowired
+  private OrderRepository orders;
+}
+```
+
+## Lombok
+
+- Add **`lombok`** as a provided/compile-only dependency; ensure the IDE and annotation processing are enabled so generated code is visible to Spring and tests.
+- **`@RequiredArgsConstructor`**: services, controllers, and other Spring components with `final` dependencies (preferred over hand-written constructors).
+- **`@Slf4j`**: default logging on classes that log; still use **SLF4J** levels and messages deliberately (replaces manual `Logger` fields).
+- **Entities / JPA**: prefer explicit **`@Getter`**, **`@Setter`**, **`@NoArgsConstructor`**, **`@AllArgsConstructor`** (or **`@Data`** only when appropriate); avoid **`@EqualsAndHashCode`** on entities with lazy collections unless you exclude those fields (`@EqualsAndHashCode.Exclude` / `callSuper`).
+- **DTOs / API models**: **`@Value`** or **`@Builder`** + **`@Getter`** as needed; use **`@Builder`** for complex immutable DTOs.
+- **`@ConfigurationProperties`**: use immutable constructor-bound beans or **records** per Spring Boot 3; add Lombok only where it aligns with Spring’s binding (avoid fighting validation or nested property maps).
+- Do not use Lombok to hide side effects or to replace clear business logic; use it for repetitive structure only.
+
+## Data & validation
+
+- Use **Spring Data JPA** when relational persistence fits; model relationships and cascades explicitly; add **Flyway** or **Liquibase** for migrations when schemas evolve.
+- Validate input with **Bean Validation** (`@Valid`, `@NotNull`, etc.) and custom validators when rules go beyond annotations.
+
+## Testing
+
+- **JUnit 5** everywhere; **`@SpringBootTest`** for full context integration tests; **`MockMvc`** (or `WebTestClient` for WebFlux) for web layer; **`@DataJpaTest`** for persistence slice tests; use mocks (`@MockBean`) to isolate layers in integration tests.
+
+## Performance & async
+
+- Use **Spring Cache** abstraction when caching helps; tune DB indexes and queries.
+- Use **`@Async`** for fire-and-forget or async workflows where appropriate; use **Spring WebFlux** only when reactive stack is a deliberate choice.
+
+## Security
+
+- Use **Spring Security** for authentication/authorization; hash passwords with **BCrypt** (or stronger algorithms aligned with your security policy); configure **CORS** when browsers call the API from other origins.
+
+## Logging & ops
+
+- Log with **SLF4J** and **Logback** (Spring Boot default); use **ERROR / WARN / INFO / DEBUG** deliberately.
+- Expose health and metrics via **Spring Boot Actuator** where operations need them.
+
+## API docs
+
+- Document REST APIs with **Springdoc OpenAPI** (OpenAPI 3) on controllers/DTOs.
+
+## Build & deployment
+
+- Use **Maven** (or Gradle) with Spring Boot plugin; environment-specific behavior via **profiles** and externalized config; **Docker** when deploying as containers.
+
+## Architecture
+
+- Apply **SOLID**; favor **high cohesion / low coupling**; use **microservice** boundaries only when requirements justify the operational cost; choose **WebFlux/reactive** vs servlet stack based on team and workload—not by default.

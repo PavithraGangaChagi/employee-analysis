@@ -16,7 +16,7 @@ public class EmployeeFileReader {
     private static final int LAST_NAME = 2;
     private static final int SALARY = 3;
     private static final int MANAGER_ID = 4;
-    private static final String CSV_DELIMITER = ",";
+    private static final String CSV_DELIMITER = ",";    
 
     /**
      * Reads employee data from a CSV file and returns a list of Employee objects.

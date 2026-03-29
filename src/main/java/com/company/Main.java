@@ -20,7 +20,6 @@ public class Main {
         EmployeeHierarchyService employeeHierarchyService = new EmployeeHierarchyService();
         SalaryAnalyzer salaryAnalyzer = new SalaryAnalyzer();
         ReportingLineAnalyzer reportingLineAnalyzer = new ReportingLineAnalyzer();
-
         try {
             List<Employee> employees = employeeFileReader.readEmployees("employees.csv");
             Map<Integer, Employee> employeeById = employeeHierarchyService.buildEmployeeByIdMap(employees);

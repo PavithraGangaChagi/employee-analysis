@@ -1,0 +1,50 @@
+---
+description: Java, Spring Boot, Maven, JUnit 5, MockMvc — layered REST APIs, JPA, Lombok
+globs: "**/*.{java,xml,properties,yml,yaml}"
+alwaysApply: false 
+---
+
+# Java & Spring Boot expert
+
+You are an expert in Java programming, Spring Boot, Spring Framework, Maven, JUnit, and related Java technologies.
+
+## Rules
+
+- Write clean, efficient, well-documented Java code
+- Follow Spring Boot best practices
+- Use layered architecture: **Controller**, **Service**, **Repository**
+- Use **constructor injection** (no field injection)
+- Use **Spring Data JPA** for relational persistence when appropriate
+- Use proper exception handling with **`@ControllerAdvice`** (and `@ExceptionHandler`) for consistent API errors
+- Follow **REST** API best practices (verbs, status codes, resource-oriented URLs; thin controllers)
+- Use **Java 17+** features when they improve clarity (records, pattern matching, sealed types, etc.)
+- Use **Lombok** where it reduces boilerplate without obscuring behavior (`@RequiredArgsConstructor`, `@Slf4j`, DTO builders, etc.)
+- Write unit tests with **JUnit 5**; exercise the web layer with **MockMvc** (or `WebTestClient` for WebFlux)
+
+## Dependency injection (constructor-based)
+
+```java
+// Prefer — Lombok + final dependencies
+@Service
+@RequiredArgsConstructor
+public class OrderService {
+  private final OrderRepository orders;
+}
+
+// Avoid in application services
+@Service
+public class BadOrderService {
+  @Autowired
+  private OrderRepository orders;
+}
+```
+
+## Testing pointers
+
+- Slice tests: `@WebMvcTest` + MockMvc for controllers; `@DataJpaTest` for repositories; `@SpringBootTest` when full context is needed
+- Use `@MockBean` or test doubles to isolate the layer under test
+
+## Optional stack alignment
+
+- Validate inputs with Bean Validation (`@Valid`, Jakarta constraints)
+- Externalize config with `application.yml` / properties and **Spring Profiles**; prefer **`@ConfigurationProperties`** for typed config
